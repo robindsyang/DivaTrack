@@ -1,4 +1,4 @@
-# DivaTrack
+# DivaTrack: Diverse Bodies and Motions from Acceleration-Enhanced Three-Point Trackers
 
 # docker
 docker pull robindsyang/divatrack
