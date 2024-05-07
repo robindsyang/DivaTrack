@@ -1,6 +1,12 @@
 # DivaTrack: Diverse Bodies and Motions from Acceleration-Enhanced Three-Point Trackers
 
-# docker
+# paper
+https://onlinelibrary.wiley.com/doi/10.1111/cgf.15057
+
+# video
+https://youtu.be/NbmcB04hGiM
+
+# docker image
 docker pull robindsyang/divatrack
 
 # dataset link
