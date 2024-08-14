@@ -295,11 +295,12 @@ class DivaTrackVel():
         dir_name = in_args.cp_dir + '/{}_{}/'.format(cp_datetime, in_args.model)
         saved_args = read_json_as_arg(dir_name + 'args.json'.format(cp_datetime))
 
-        calibmodel = CalibModel(6 * 3 * 9, 22 * 3, 256).to(self.device)
-        cPATH = in_args.cp_dir + '/0113_210014_FCCalib_6000.pth'
-        calibmodel.load_state_dict(torch.load(cPATH))
-        calibmodel.eval()
-        calibloader = self.loaders.skel
+        # use calib model after training it with FC_calib.py
+        # calibmodel = CalibModel(6 * 3 * 9, 22 * 3, 256).to(self.device)
+        # cPATH = in_args.cp_dir + '/0113_210014_FCCalib_6000.pth'
+        # calibmodel.load_state_dict(torch.load(cPATH))
+        # calibmodel.eval()
+        # calibloader = self.loaders.skel
 
         umodel = UModel(saved_args.window_size, (4 * 9) + (4 * 9) + (3 * 3), (15 * 9), saved_args.emb_dim, saved_args.hid_dim, saved_args.lat_dim, saved_args.n_head, saved_args.n_layer)
         lmodel = LModel(saved_args.window_size, (15 * 9) + (8 * 9) + 2, (8 * 9), saved_args.emb_dim, saved_args.hid_dim, saved_args.n_head, saved_args.n_layer)
@@ -378,19 +379,19 @@ class DivaTrackVel():
                                     sample["ref_t"].to(self.device), sample["imu_a"].to(self.device),\
                                     sample["contact"].to(self.device)
             
-            if "totalcapture" and "hps" not in in_args.valid_set:
-                # calib start
-                csample = calibloader.dataset.get_item_by_name(sample['name'])
-                print(csample['name'] + ' calibration')
-                caliblocal_t, calibworld_t, calibref_t, calibimu_a, calibcontact = csample["local_t"].to(self.device), csample["world_t"].to(self.device),\
-                                                            csample["ref_t"].to(self.device), csample["imu_a"].to(self.device),\
-                                                            csample["contact"].to(self.device)
-                gtcalib_skel = caliblocal_t[:, 0, 1:, :3, 3].reshape(1, 66)
-                calibinput = calibref_t[:, :, [7, 11, 15], :3, 1:].reshape(1, -1)    
-                predcalib_skel = calibmodel(calibinput)
-                calib_avg_pos_err, per_joint_calib_avg_pos_err = l2_3d(predcalib_skel.unsqueeze(1), gtcalib_skel.unsqueeze(1))
-                print("skel err: {}".format(calib_avg_pos_err.item()))
-                predcalib_skel = predcalib_skel.reshape(1, 1, 66).repeat(1, 29, 1)
+            # if "totalcapture" and "hps" not in in_args.valid_set:
+            #     # calib start
+            #     csample = calibloader.dataset.get_item_by_name(sample['name'])
+            #     print(csample['name'] + ' calibration')
+            #     caliblocal_t, calibworld_t, calibref_t, calibimu_a, calibcontact = csample["local_t"].to(self.device), csample["world_t"].to(self.device),\
+            #                                                 csample["ref_t"].to(self.device), csample["imu_a"].to(self.device),\
+            #                                                 csample["contact"].to(self.device)
+            #     gtcalib_skel = caliblocal_t[:, 0, 1:, :3, 3].reshape(1, 66)
+            #     calibinput = calibref_t[:, :, [7, 11, 15], :3, 1:].reshape(1, -1)    
+            #     predcalib_skel = calibmodel(calibinput)
+            #     calib_avg_pos_err, per_joint_calib_avg_pos_err = l2_3d(predcalib_skel.unsqueeze(1), gtcalib_skel.unsqueeze(1))
+            #     print("skel err: {}".format(calib_avg_pos_err.item()))
+            #     predcalib_skel = predcalib_skel.reshape(1, 1, 66).repeat(1, 29, 1)
 
             b, frames, _, _, _ = local_t_full.shape
             
@@ -430,8 +431,8 @@ class DivaTrackVel():
                 gt_contact_window = contact[:, 1:].reshape(b, l-1, -1)
                 
                 pred_skel = local_t[:, 1:, :, :3, 3].reshape(b, l-1, -1)
-                if in_args.provide_gtskel == "False":
-                    pred_skel[:, :, 3:] = predcalib_skel
+                # if in_args.provide_gtskel == "False":
+                #     pred_skel[:, :, 3:] = predcalib_skel
 
                 gt_skel = local_t[:, 1:, :, :3, 3].reshape(b, l-1, -1)
                 

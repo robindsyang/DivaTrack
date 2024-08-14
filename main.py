@@ -13,15 +13,12 @@ def main(args):
         
     model = DivaTrackVel(args, loaders)
     
-    if args.mode == 'train':
-        model.train()
-    elif args.mode == 'infer':
+    if args.mode == 'infer':
         model.infer()
     elif args.mode == 'export':
         model.export()
     else:
         raise NotImplementedError
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
